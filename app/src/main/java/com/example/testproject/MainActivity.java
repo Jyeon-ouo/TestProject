@@ -16,7 +16,9 @@ public class MainActivity extends AppCompatActivity {
     EditText otcAddReason = findViewById(R.id.otc_drug_add_reason);
     EditText otcAddDate = findViewById(R.id.otc_drug_add_date);
 
+    //파이어베이스 데이터베이스 연동
     private final FirebaseDatabase database = FirebaseDatabase.getInstance();
+    //databaseReference : 데이터베이스의 특정 위치로 연결
     private final DatabaseReference databaseReference = database.getReference();
 
     @Override
@@ -24,19 +26,29 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         init();
+
+        Button otcAddSaveBtn = findViewById(R.id.otc_drug_add_save);
+        Button otcAddCancelBtn = findViewById(R.id.otc_drug_add_cancel);
+        EditText otcAddNameEdit = findViewById(R.id.otc_drug_add_name);
+        EditText otcAddReasonEdit = findViewById(R.id.otc_drug_add_reason);
+        EditText otcAddDateEdit = findViewById(R.id.otc_drug_add_date);
+
+        otcAddSaveBtn.setOnClickListener(new View.OnClickListener() {
+           @Override
+           public void onClick(View view){
+                addOtcList(otcAddName.getText().toString(), otcAddReason.getText().toString(), otcAddDate.getText().toString());
+           }
+        });
     }
 
-    View.OnClickListener onClickListener = new View.OnClickListener(){
-        @SuppressLint("NonConstantResourceId")
-        @Override
-        public void onClick(View view){
-            switch(view.getId()){
-                case R.id.otc_drug_add_save:
-                    writeNewOtc();
-                    break;
-            }
-        }
-    };
+    //값을 파이어베이스 Realtime database로 넘기는 함수
+    public void addOtcList(String otcAddName, String otcAddReason, String otcAddDate){
+        //otcAdd.java에서 선언했던 함수
+        otcAdd otcAdd = new otcAdd(otcAddName, otcAddReason, otcAddDate);
+
+        //child : 해당 키 위치로 이동하는 함수
+        databaseReference.child("otcManagementList").child(otcAddName).setValue(otcAddReason, otcAddDate);
+    }
 
     @SuppressLint("ResourceType")
     private void init() {
@@ -44,12 +56,6 @@ public class MainActivity extends AppCompatActivity {
         otcSaveBtn.setOnClickListener((View.OnClickListener) this);
     }
 
-    private void writeNewOtc() {
-        otcAdd otcAdd = new otcAdd();
-        otcAdd.setOtcName(otcAddName.getText().toString());
-        otcAdd.setOtcReason(otcAddReason.getText().toString());
-        otcAdd.setOtcDate(otcAddDate.getText().toString());
-        databaseReference.child("otcAdd").child("1").push().setValue(otcAdd);
-    }
+
 
 }
